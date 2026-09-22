@@ -1,0 +1,24 @@
+const {_electron:electron}=require('@playwright/test');const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');
+(async()=>{
+ const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'pocketplan-ui-'));
+ const env={...process.env,POCKETPLAN_DATA_DIR:dir};delete env.ELECTRON_RUN_AS_NODE;
+ const desktop=await electron.launch({args:[path.join(__dirname,'..')],env});
+ try{
+ const page=await desktop.firstWindow();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.getByLabel('Vault password',{exact:true}).fill('desktop-test-password');await page.getByLabel('Confirm password').fill('desktop-test-password');await page.getByRole('button',{name:'Create my private planner'}).click();
+ await page.getByRole('heading',{name:'Overview',exact:true}).waitFor();
+ assert.match(await page.locator('.stats').innerText(),/800.00/);
+ await page.getByRole('button',{name:'+ Add expense',exact:true}).click();await page.getByLabel('Amount (GHS)').fill('120.50');await page.getByLabel('Description').fill('Fuel top-up');await page.getByLabel('Category',{exact:true}).selectOption('Fuel');await page.getByRole('button',{name:'Save transaction'}).click();await page.locator('dialog').waitFor({state:'hidden'});
+ assert.match(await page.locator('.stats').innerText(),/679.50/);
+ await page.getByRole('button',{name:'Household',exact:true}).click();await page.getByRole('button',{name:'+ Add item'}).click();await page.getByLabel('Item name').fill('Laundry detergent');await page.getByLabel('Quantity',{exact:true}).fill('2');await page.getByLabel('Availability').selectOption('Out of stock');await page.getByRole('button',{name:'Save changes'}).click();await page.locator('dialog').waitFor({state:'hidden'});
+ const row=page.getByRole('row').filter({hasText:'Laundry detergent'});assert.match(await row.innerText(),/—/);await row.getByRole('button',{name:'Buy',exact:true}).click();await page.getByLabel('Amount (GHS)').fill('30');await page.getByRole('button',{name:'Save transaction'}).click();await page.locator('dialog').waitFor({state:'hidden'});assert.match(await row.innerText(),/Available/);
+ await page.getByRole('button',{name:'Savings',exact:true}).click();await page.getByRole('button',{name:'+ Move money to savings'}).click();await page.getByLabel('Amount (GHS)').fill('100');await page.getByRole('button',{name:'Save transaction'}).click();await page.locator('dialog').waitFor({state:'hidden'});assert.match(await page.locator('.savings-number').innerText(),/4,100.00/);
+ await page.getByRole('button',{name:'Budgets',exact:true}).click();await page.locator('.budget-grid .panel').filter({hasText:'Fuel'}).getByRole('button',{name:'Set limit'}).click();await page.getByLabel('Monthly limit (GHS)').fill('400');await page.getByRole('button',{name:'Save changes'}).click();await page.locator('dialog').waitFor({state:'hidden'});
+ await page.getByRole('button',{name:'Overview',exact:true}).click();fs.mkdirSync(path.join(__dirname,'../artifacts'),{recursive:true});await page.locator('#toast.show').waitFor({state:'hidden'});await page.screenshot({path:path.join(__dirname,'../artifacts/overview-dark.png'),fullPage:true});
+ await page.getByRole('button',{name:'Light appearance'}).click();await page.waitForFunction(()=>document.documentElement.dataset.theme==='light');await page.screenshot({path:path.join(__dirname,'../artifacts/overview-light.png'),fullPage:true});
+ await page.getByRole('button',{name:'Lock planner',exact:true}).click();await page.getByLabel('Vault password',{exact:true}).fill('desktop-test-password');await page.getByRole('button',{name:'Unlock planner'}).click();await page.getByRole('heading',{name:'Overview',exact:true}).waitFor();assert.match(await page.locator('.stats').innerText(),/549.50/);assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
+ await page.getByRole('button',{name:'Transactions',exact:true}).click();const fuelRow=page.getByRole('row').filter({hasText:'Fuel top-up'});await fuelRow.getByRole('button',{name:'Edit',exact:true}).click();await page.getByLabel('Amount (GHS)').fill('100');await page.getByRole('button',{name:'Save transaction'}).click();await page.locator('dialog').waitFor({state:'hidden'});await fuelRow.getByRole('button',{name:'Delete Fuel top-up'}).click();await page.getByRole('button',{name:'Delete record'}).click();await page.locator('dialog').waitFor({state:'hidden'});
+ await page.getByRole('button',{name:'Overview',exact:true}).click();assert.match(await page.locator('.stats').innerText(),/670.00/);assert.deepEqual(errors,[]);
+ console.log('PASS: vault creation, expenses, household purchases, savings, budgets, edit/delete, dark/light themes, lock/unlock and persistence.');
+ }finally{await desktop.close();fs.rmSync(dir,{recursive:true,force:true});}
+})().catch(e=>{console.error(e);process.exitCode=1;});

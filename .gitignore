@@ -1,0 +1,8 @@
+node_modules/
+.npm-cache/
+release/
+test-results/
+*.vault
+*.tmp
+*.bak
+.test-data/
