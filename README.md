@@ -4,7 +4,7 @@ A private Windows desktop planner for spending, household essentials, budgets an
 
 ## Open the app
 
-Run `release/PocketPlan 1.0.0.exe`. Create a vault password of at least 10 characters. Keep the password safe: there is no recovery service.
+Run `release/PocketPlan 1.0.0.exe`. Create a vault password of at least 4 characters. Keep the password safe: there is no recovery service.
 
 Your starting plan contains GHS800 available cash, GHS4,000 existing savings, expected salary of GHS7,120, a payday window of the 22nd–31st, and a monthly savings target of GHS2,000. Starting balances are dated 22 September 2026. Edit these records under Transactions if your situation has changed. Set your total rent goal in Settings; no rent amount has been assumed.
 

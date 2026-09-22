@@ -16,6 +16,10 @@ test('payday clamps short months and includes today in remaining days',()=>{
 test('validation rejects fractional money, invalid dates and injected record IDs',()=>{
  const s=initial();s.entries[0].amount=1.1;assert.throws(()=>validate(s));s.entries[0].amount=1;s.entries[0].date='2026-02-31';assert.throws(()=>validate(s));s.entries[0].date='2026-09-22';s.items[0].id='" onclick="bad';assert.throws(()=>validate(s));
 });
+test('vault passwords require at least four characters',async()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'pocketplan-password-test-'));const file=path.join(dir,'budget.vault');const vault=new Vault(file);
+ try {await assert.rejects(vault.open('abc',true),/4–1024/);await vault.open('abcd',true);assert.equal(vault.read().settings.salary,712000);} finally {vault.close();fs.rmSync(dir,{recursive:true,force:true});}
+});
 test('encrypted SQLite persists, rejects wrong passwords and tampering, restores across passwords',async()=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'pocketplan-test-'));const file=path.join(dir,'one.vault');const backup=path.join(dir,'backup.vault');let v=new Vault(file),other;
  try{
