@@ -2,12 +2,13 @@ const {_electron:electron}=require('@playwright/test');const assert=require('nod
 (async()=>{
  const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'pocketplan-ui-'));
  const env={...process.env,POCKETPLAN_DATA_DIR:dir};delete env.ELECTRON_RUN_AS_NODE;
- const desktop=await electron.launch({args:[path.join(__dirname,'..')],env});
+ const desktop=await electron.launch({args:[path.join(__dirname,'..'),`--user-data-dir=${dir}`],env});
  try{
  const page=await desktop.firstWindow();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.getByLabel('Vault password',{exact:true}).fill('desktop-test-password');await page.getByLabel('Confirm password').fill('desktop-test-password');await page.getByRole('button',{name:'Create my private planner'}).click();
  await page.getByRole('heading',{name:'Overview',exact:true}).waitFor();
  assert.match(await page.locator('.stats').innerText(),/800.00/);
+ await page.getByRole('button',{name:'Update salary'}).click();await page.getByLabel('Monthly salary (GHS)').fill('8000');await page.locator('dialog').getByRole('button',{name:'Update salary',exact:true}).click();await page.locator('dialog').waitFor({state:'hidden'});assert.match(await page.locator('.payday-amount').innerText(),/8,000.00/);
  await page.getByRole('button',{name:'+ Add expense',exact:true}).click();await page.getByLabel('Amount (GHS)').fill('120.50');await page.getByLabel('Description').fill('Fuel top-up');await page.getByLabel('Category',{exact:true}).selectOption('Fuel');await page.getByRole('button',{name:'Save transaction'}).click();await page.locator('dialog').waitFor({state:'hidden'});
  assert.match(await page.locator('.stats').innerText(),/679.50/);
  await page.getByRole('button',{name:'Household',exact:true}).click();await page.getByRole('button',{name:'+ Add item'}).click();await page.getByLabel('Item name').fill('Laundry detergent');await page.getByLabel('Quantity',{exact:true}).fill('2');await page.getByLabel('Availability').selectOption('Out of stock');await page.getByRole('button',{name:'Save changes'}).click();await page.locator('dialog').waitFor({state:'hidden'});

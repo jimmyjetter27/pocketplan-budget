@@ -1,6 +1,6 @@
 const {_electron:electron}=require('@playwright/test');const fs=require('node:fs');const path=require('node:path');const assert=require('node:assert/strict');
 (async()=>{
  const dir=fs.mkdtempSync(path.join(require('node:os').tmpdir(),'pocketplan-packaged-'));const env={...process.env,POCKETPLAN_DATA_DIR:dir};delete env.ELECTRON_RUN_AS_NODE;
- const app=await electron.launch({executablePath:path.resolve(__dirname,'../release/win-unpacked/PocketPlan.exe'),args:[],env});
+ const app=await electron.launch({executablePath:path.resolve(__dirname,'../release/win-unpacked/PocketPlan.exe'),args:[`--user-data-dir=${dir}`],env});
  try{const page=await app.firstWindow();await page.getByLabel('Vault password',{exact:true}).fill('1234');await page.getByLabel('Confirm password').fill('1234');await page.getByRole('button',{name:'Create my private planner'}).click();await page.getByRole('heading',{name:'Overview',exact:true}).waitFor();assert.match(await page.locator('.stats').innerText(),/800.00/);assert.match(await page.locator('.stats').innerText(),/4,000.00/);assert.equal(await app.evaluate(({app})=>app.isPackaged),true);await page.screenshot({path:path.resolve(__dirname,'../artifacts/first-run.png'),fullPage:true});console.log('PASS: packaged Windows executable accepts a four-character password and creates the encrypted vault.');}finally{await app.close();fs.rmSync(dir,{recursive:true,force:true});}
 })().catch(e=>{console.error(e);process.exitCode=1;});
