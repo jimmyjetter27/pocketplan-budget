@@ -3,6 +3,7 @@ node_modules/
 release/
 test-results/
 *.vault
+!data/budget.vault
 *.tmp
 *.bak
 .test-data/
