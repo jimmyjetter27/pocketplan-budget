@@ -16,6 +16,11 @@ test('payday clamps short months and includes today in remaining days',()=>{
 test('validation rejects fractional money, invalid dates and injected record IDs',()=>{
  const s=initial();s.entries[0].amount=1.1;assert.throws(()=>validate(s));s.entries[0].amount=1;s.entries[0].date='2026-02-31';assert.throws(()=>validate(s));s.entries[0].date='2026-09-22';s.items[0].id='" onclick="bad';assert.throws(()=>validate(s));
 });
+test('household items support descriptive, non-numeric amounts',()=>{
+ const s=initial();const gas=s.items.find(i=>i.name==='Cooking gas');assert.equal(gas.quantity,null);assert.equal(gas.quantityLabel,'Cylinder / refill');assert.doesNotThrow(()=>validate(s));
+ gas.quantityLabel='Half cylinder';gas.unit='';assert.doesNotThrow(()=>validate(s));
+ gas.quantityLabel='';gas.quantity=null;gas.unit='';assert.doesNotThrow(()=>validate(s));
+});
 test('vault passwords require at least four characters',async()=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'pocketplan-password-test-'));const file=path.join(dir,'budget.vault');const vault=new Vault(file);
  try {await assert.rejects(vault.open('abc',true),/4–1024/);await vault.open('abcd',true);assert.equal(vault.read().settings.salary,712000);} finally {vault.close();fs.rmSync(dir,{recursive:true,force:true});}

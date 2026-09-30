@@ -4,7 +4,7 @@ A private Windows desktop planner for spending, household essentials, budgets an
 
 ## Open the app
 
-Run `release/PocketPlan 1.0.0.exe`. Create a vault password of at least 4 characters. Keep the password safe: there is no recovery service.
+Run `release/PocketPlan 1.0.1.exe`. Create a vault password of at least 4 characters. Keep the password safe; there is no recovery service.
 
 Your starting plan contains GHS800 available cash, GHS4,000 existing savings, expected salary of GHS7,120, a payday window of the 22nd–31st, and a monthly savings target of GHS2,000. Starting balances are dated 22 September 2026. Edit these records under Transactions if your situation has changed. Set your total rent goal in Settings; no rent amount has been assumed.
 
@@ -12,7 +12,7 @@ Your starting plan contains GHS800 available cash, GHS4,000 existing savings, ex
 
 - **Overview:** see cash, savings, current-month spending and expected payday. Salary only becomes cash when you record it as received.
 - **Transactions:** add, edit, delete, search and filter by month. Amounts are stored in integer pesewas. Expenses subtract cash; income adds cash; savings transfers move between cash and savings without becoming expenses. Transactions are recorded when they occur, not as future forecasts.
-- **Household:** track quantity, unit, optional unit price and availability. Quantity is a tracked or planned amount, not an automatically depleted stock count. Low and out-of-stock estimates use quantity × known unit price. Buy records an expense and marks the item available.
+- **Household:** use a numeric quantity for countable items, or write a plain-language amount such as “half cylinder” or “refill” for things that cannot be usefully counted. Unit price is optional. Low and out-of-stock estimates only use numeric quantity × known unit price. Buy records an expense and marks the item available.
 - **Budgets:** set category limits that repeat each month. Editing a limit changes the plan shown for all months. Spending uses calendar months, not salary cycles. Budgets do not automatically move money.
 - **Savings:** record deposits and withdrawals, see your rent goal and monthly contribution progress. Existing starting savings is separate from new monthly transfers.
 - **Settings:** edit salary, payday window, savings and rent targets; export or restore encrypted backups.
